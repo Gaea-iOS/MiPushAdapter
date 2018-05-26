@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'MiPushAdapter_Example' do
+  pod 'MiPushAdapter', :path => '../'
+
+  target 'MiPushAdapter_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
