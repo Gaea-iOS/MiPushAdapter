@@ -1,0 +1,8 @@
+#!/bin/sh
+
+cd MiPushAdapter/Classes/
+
+curl -o MiPushSDK.zip http://osr81xpwt.bkt.clouddn.com/iOS/MiPushSDK2.2.8.zip
+unzip MiPushSDK.zip
+rm -rf MiPush*.zip
+rm -rf __MACOSX

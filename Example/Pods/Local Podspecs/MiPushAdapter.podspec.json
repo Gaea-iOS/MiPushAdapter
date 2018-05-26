@@ -1,0 +1,38 @@
+{
+  "name": "MiPushAdapter",
+  "version": "0.4.0",
+  "summary": "A short description of MiPushAdapter.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/wangxiaotao/MiPushAdapter",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "wangxiaotao": "445242970@qq.com"
+  },
+  "source": {
+    "git": "https://github.com/wangxiaotao/MiPushAdapter.git",
+    "tag": "0.4.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "requires_arc": true,
+  "prepare_command": "./install",
+  "public_header_files": "MiPushAdapter/Classes/MiPushSDK/*.h",
+  "source_files": "MiPushAdapter/Classes/**/*",
+  "vendored_libraries": "MiPushAdapter/Classes/MiPushSDK/libMiPushSDK.a",
+  "frameworks": [
+    "MobileCoreServices",
+    "SystemConfiguration",
+    "CFNetwork",
+    "CoreTelephony",
+    "UserNotifications"
+  ],
+  "libraries": [
+    "z",
+    "xml2",
+    "resolv"
+  ]
+}

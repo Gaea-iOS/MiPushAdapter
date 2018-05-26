@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'MiPushAdapter'
-  s.version          = '0.1.0'
+  s.version          = '0.4.0'
   s.summary          = 'A short description of MiPushAdapter.'
 
 # This description is used to generate tags and improve search results.
@@ -29,14 +29,15 @@ TODO: Add long description of the pod here.
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '8.0'
-
-  s.source_files = 'MiPushAdapter/Classes/**/*'
   
-  # s.resource_bundles = {
-  #   'MiPushAdapter' => ['MiPushAdapter/Assets/*.png']
-  # }
+  s.requires_arc = true
+  s.prepare_command = './install'
+  
+  s.public_header_files = 'MiPushAdapter/Classes/MiPushSDK/*.h'
+  s.source_files = 'MiPushAdapter/Classes/**/*'
+  s.vendored_libraries  = 'MiPushAdapter/Classes/MiPushSDK/libMiPushSDK.a'
+  
+  s.frameworks = 'MobileCoreServices', 'SystemConfiguration', 'CFNetwork', 'CoreTelephony', 'UserNotifications'
+  s.library = 'z', 'xml2', 'resolv'
 
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
 end

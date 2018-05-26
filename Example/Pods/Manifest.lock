@@ -1,0 +1,16 @@
+PODS:
+  - MiPushAdapter (0.4.0)
+
+DEPENDENCIES:
+  - MiPushAdapter (from `../`)
+
+EXTERNAL SOURCES:
+  MiPushAdapter:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  MiPushAdapter: 8ad175446a8045ea8190348c214432f5a604272e
+
+PODFILE CHECKSUM: f4ba97bfe8a50de2aedb1c8c919b55ef1d3f0159
+
+COCOAPODS: 1.5.0
