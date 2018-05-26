@@ -48,8 +48,10 @@ public class MiPushAdapter: NSObject {
     
     public weak var delegate: MiPushAdapterDelegate?
     
+    private var mipushHandler: MipushHandler = MipushHandler()
+    
     public func registerAPNs() {
-        MiPushSDK.registerMiPush(self, type: [.badge, .alert, .sound], connect: true)
+        MiPushSDK.registerMiPush(self.mipushHandler, type: [.badge, .alert, .sound], connect: true)
     }
     
     public func clearBadge() {
@@ -77,6 +79,35 @@ public class MiPushAdapter: NSObject {
     }
 }
 
+protocol MiPushDelegateHandlerProtocol: class {
+    
+    func miPushRequestSucc(withSelector selector: String!, data: [AnyHashable : Any]!)
+    
+    func miPushRequestErr(withSelector selector: String!, error: Int32, data: [AnyHashable : Any]!)
+    
+    func miPushReceiveNotification(_ data: [AnyHashable : Any]!)
+}
+
+class MipushHandler: NSObject, MiPushSDKDelegate {
+    
+    weak var delegate: MiPushDelegateHandlerProtocol?
+    
+     func miPushRequestSucc(withSelector selector: String!, data: [AnyHashable : Any]!) {
+        // 请求成功，可在此处获取regId
+        self.delegate?.miPushRequestSucc(withSelector: selector, data: data)
+    }
+    
+     func miPushRequestErr(withSelector selector: String!, error: Int32, data: [AnyHashable : Any]!) {
+        self.delegate?.miPushRequestErr(withSelector: selector, error: error, data: data)
+    }
+    
+     func miPushReceiveNotification(_ data: [AnyHashable : Any]!) {
+        self.delegate?.miPushReceiveNotification(data)
+
+    }
+}
+
+
 extension MiPushAdapter {
     
     /// 处理启动时的推送消息
@@ -100,10 +131,10 @@ extension MiPushAdapter {
     }
 }
 
-extension MiPushAdapter: UNUserNotificationCenterDelegate {
+extension MipushHandler: UNUserNotificationCenterDelegate {
     // 应用在前台收到通知
     @available(iOS 10.0, *)
-    public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Swift.Void) {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Swift.Void) {
         let userInfo = notification.request.content.userInfo
         if let trigger = notification.request.trigger,
             trigger.isKind(of: UNPushNotificationTrigger.self) {
@@ -114,7 +145,7 @@ extension MiPushAdapter: UNUserNotificationCenterDelegate {
     
     // 点击通知进入应用
     @available(iOS 10.0, *)
-    public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response:
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response:
         UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Swift.Void) {
         let userInfo = response.notification.request.content.userInfo
         if let trigger = response.notification.request.trigger,
@@ -124,10 +155,42 @@ extension MiPushAdapter: UNUserNotificationCenterDelegate {
         }
         completionHandler()
     }
+    
+    private func openAppNotify(userInfo: [AnyHashable: Any]?) {
+        if let messageId = userInfo?["_id_"] as? String {
+            MiPushSDK.openAppNotify(messageId)
+        }
+    }
 }
 
-extension MiPushAdapter: MiPushSDKDelegate {
-    
+//extension MiPushAdapter: UNUserNotificationCenterDelegate {
+//    // 应用在前台收到通知
+//    @available(iOS 10.0, *)
+//    public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Swift.Void) {
+//        let userInfo = notification.request.content.userInfo
+//        if let trigger = notification.request.trigger,
+//            trigger.isKind(of: UNPushNotificationTrigger.self) {
+//            MiPushSDK.handleReceiveRemoteNotification(userInfo)
+//        }
+//        completionHandler([])
+//    }
+//
+//    // 点击通知进入应用
+//    @available(iOS 10.0, *)
+//    public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response:
+//        UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Swift.Void) {
+//        let userInfo = response.notification.request.content.userInfo
+//        if let trigger = response.notification.request.trigger,
+//            trigger.isKind(of: UNPushNotificationTrigger.self) {
+//            MiPushSDK.handleReceiveRemoteNotification(userInfo)
+//            openAppNotify(userInfo: userInfo)
+//        }
+//        completionHandler()
+//    }
+//}
+
+extension MiPushAdapter: MiPushDelegateHandlerProtocol {
+
     public func miPushRequestSucc(withSelector selector: String!, data: [AnyHashable : Any]!) {
         // 请求成功，可在此处获取regId
         if selector == "bindDeviceToken:",
@@ -135,24 +198,24 @@ extension MiPushAdapter: MiPushSDKDelegate {
             delegate?.miPushAdapter(self, didGetRegId: regId)
         }
     }
-    
+
     public func miPushRequestErr(withSelector selector: String!, error: Int32, data: [AnyHashable : Any]!) {
         if selector == "bindDeviceToken:" {
             print("MiPush bindDeviceToken failed")
         }
     }
-    
+
     public func miPushReceiveNotification(_ data: [AnyHashable : Any]!) {
         guard let data = data else { return }
         let ops = data["aps"] as? [AnyHashable: Any]
-        
+
         let badge = ops?["badge"] as? Int
         let alert = ops?["alert"] as? [String: Any]
         let title = alert?["title"] as? String
         let subtitle = alert?["subtitle"] as? String
         let body = alert?["body"] as! String
         let sound = ops?["sound"] as? String
-        
+
         let aps = PushData.APS(badge: badge, sound: sound, alert: PushData.APS.Alert(title: title, subtitle: subtitle, body: body))
         let pushData = PushData(aps: aps, data: data)
         delegate?.miPushAdapter(self, didReceiveNotification: pushData)
